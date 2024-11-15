@@ -62,6 +62,21 @@ def create_table_charge_and_save(param_list, param_key, title, format=None):
         st.session_state.parameters = st.session_state.get('parameters', {})
         st.session_state.parameters[param_key] = updated_params
         st.success(f"{title} guardados exitosamente!")
+        
+    # Save to database
+    username = st.session_state["username"]
+    user = db.fetch_user(username)
+    if user is not None:
+        # Update only the specific parameter key
+        parameters = user.get('parameters', {})
+        parameters[param_key] = updated_params
+        if db.update_user(username, {'parameters': parameters}):
+            st.success(f"{title} guardados exitosamente!")
+        else:
+            st.error("Error al guardar los datos en la base de datos.")
+    else:
+        st.error(f"Error: User {username} not found in the database.")"
+
 
 def main():
     """

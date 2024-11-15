@@ -11,12 +11,6 @@ st.set_page_config(
     layout="wide"  # Diseño de la página
 )
 
-# Cargar toda la configuración
-env_settings = load_config()
-
-# Obtener la configuración específica de PostgreSQL
-db_config = get_db_config(env_settings)
-
 def main():
         # Título de la página
         st.title("Base de datos :card_file_box:")

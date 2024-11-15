@@ -38,3 +38,7 @@ def get_db_config(env_settings: Dict[str, str]) -> Dict[str, str]:
         'host': env_settings.get('DBHOST'),
         'port': env_settings.get('DBPORT')
     }
+
+
+def get_db_connection():
+    return psycopg2.connect(**db_config)
