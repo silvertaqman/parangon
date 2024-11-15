@@ -3,6 +3,7 @@ from utils import backend
 import psycopg2
 from config.confloader import load_config, get_db_config
 import pandas as pd
+import logging
 
 st.title("🎈 My new app")
 st.write(
