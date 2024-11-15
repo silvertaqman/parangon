@@ -1,10 +1,7 @@
 import streamlit as st
-from utils import backend
-import psycopg2
-from config.confloader import *
-import pandas as pd
+from config.confloader import load_config, get_db_config
 import logging
-from users.auten import verify_user
+from users import verify_user
 
 st.title("ScoreCard Software")
 st.write(

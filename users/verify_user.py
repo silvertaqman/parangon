@@ -1,5 +1,4 @@
 import streamlit as st
-import bcrypt
 from config.confloader import get_db_connection
 
 def verify_user(username, password):
@@ -27,6 +26,7 @@ def verify_user(username, password):
 """
 # Crear un hash (password encriptado) para cada usuario que ingresa
 # Debe hacerse para cada nuevo usuario
+import bcrypt
 def generate_password_hash(password):
     # Convertir la contraseña en bytes y generar el hash
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())

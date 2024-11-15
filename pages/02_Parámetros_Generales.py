@@ -1,7 +1,6 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
 import json
-from utils import backend
 import data.db as db
 
 # Configurar la página de Streamlit
