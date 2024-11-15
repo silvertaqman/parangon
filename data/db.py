@@ -1,5 +1,12 @@
+import psycopg2
+from psycopg2 import sql
+from config.confloader import load_config
 import logging
 import os
+import bcrypt
+import json
+from psycopg2.extras import Json
+from config.confloader import load_config, get_db_config
 
 #env_settings = load_config()
 DISK_MOUNT_PATH = '/mnt/volume'
@@ -9,7 +16,16 @@ DISK_MOUNT_PATH = '/mnt/volume'
 # necesitarán una solución diferente, ya que PostgreSQL no maneja archivos directamente.
 # Podrías considerar usar un sistema de archivos separado o un servicio de almacenamiento en la nube.
 
-username = "."
+# Cargar toda la configuración
+try:
+    env_settings = load_config()
+    #print(f"Configuración cargada: {env_settings}")
+except Exception as e:
+    logging.error(f"Error al cargar la configuración: {e}")
+    raise
+
+# Obtener la configuración específica de PostgreSQL
+db_config = get_db_config(env_settings)
 
 def create_drive(username, file):
     file_name = f"{username}/table.xlsx"

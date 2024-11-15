@@ -1,7 +1,8 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
 from utils import backend
-import db
+import data.db as db
+from config.confloader import load_config, get_db_config
 
 # Configurar la página de Streamlit
 st.set_page_config(
@@ -9,6 +10,12 @@ st.set_page_config(
     page_icon="🏗️",  # Ícono de la página
     layout="wide"  # Diseño de la página
 )
+
+# Cargar toda la configuración
+env_settings = load_config()
+
+# Obtener la configuración específica de PostgreSQL
+db_config = get_db_config(env_settings)
 
 def main():
         # Título de la página
