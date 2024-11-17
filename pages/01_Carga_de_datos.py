@@ -68,3 +68,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+"""
+Esta funcion mantiene el ultimo archivo cargado, eso deberia removerse.
+"""

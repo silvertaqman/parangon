@@ -1,6 +1,7 @@
 from typing import Dict
 import yaml
 from decouple import config
+import psycopg2
 
 # Define el path al archivo YAML de configuración
 PATH_CONFIG_YAML = config('PATH_CONFIG_YAML', default='config/config.yaml')
@@ -40,5 +41,5 @@ def get_db_config(env_settings: Dict[str, str]) -> Dict[str, str]:
     }
 
 
-def get_db_connection():
+def get_db_connection(db_config):
     return psycopg2.connect(**db_config)

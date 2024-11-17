@@ -1,9 +1,14 @@
 import streamlit as st
+import bcrypt
 from config.confloader import get_db_connection
 
-def verify_user(username, password):
+def verify_user(username, password, db_config):
+    """
+    Verifica si un usuario existe en la base de datos y si la contraseña proporcionada coincide con la almacenada (hasheada con bcrypt).
+    """
     try:
-        connection = get_db_connection()
+        # Conectarse a la DB
+        connection = get_db_connection(db_config)
         cursor = connection.cursor()
 
         # Verificar usuario en la base de datos en PSQL/Aiven
@@ -17,7 +22,9 @@ def verify_user(username, password):
         if result:
             # Comparar hash de la contraseña ingresada
             stored_password_hash = result[0]
-            return stored_password_hash == hash_password(password)
+            # Comparar la contraseña ingresada con el hash almacenado
+            if bcrypt.checkpw(password.encode('utf-8'), stored_password_hash.encode('utf-8')):
+                return True
         return False
     except Exception as e:
         st.error(f"Error conectando a la base de datos: {e}")
