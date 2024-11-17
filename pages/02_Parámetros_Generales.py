@@ -74,7 +74,7 @@ def create_table_charge_and_save(param_list, param_key, title, format=None):
         else:
             st.error("Error al guardar los datos en la base de datos.")
     else:
-        st.error(f"Error: User {username} not found in the database.")"
+        st.error(f"Error: User {username} not found in the database.")
 
 
 def main():

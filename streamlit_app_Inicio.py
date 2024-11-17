@@ -3,11 +3,6 @@ from config.confloader import load_config, get_db_config
 import logging
 from users import verify_user
 
-st.title("ScoreCard Software")
-st.write(
-    "Bienvenido. Esta herramienta le ayudará a gestionar su inventario. "
-)
-
 # Cargar toda la configuración
 try:
     env_settings = load_config()

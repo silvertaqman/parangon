@@ -1,8 +1,9 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
-from utils import backend
+from utils.do_df import check_dataframe_columns, check_extension, get_styled_dataframe, get_transformed_dataframe, download_dataframe
 import data.db as db
 from config.confloader import load_config, get_db_config
+import logging
 
 # Configurar la página de Streamlit
 st.set_page_config(
@@ -10,6 +11,17 @@ st.set_page_config(
     page_icon="🏗️",  # Ícono de la página
     layout="wide"  # Diseño de la página
 )
+
+# Cargar toda la configuración
+try:
+    env_settings = load_config()
+    #print(f"Configuración cargada: {env_settings}")
+except Exception as e:
+    logging.error(f"Error al cargar la configuración: {e}")
+    raise
+
+# Obtener la configuración específica de PostgreSQL
+db_config = get_db_config(env_settings)
 
 def main():
         # Título de la página
@@ -20,8 +32,8 @@ def main():
 
         if uploaded_data:
             # Verifica la extensión del archivo y las columnas del DataFrame
-            backend.check_extension(uploaded_data)
-            backend.check_dataframe_columns(uploaded_data)
+            check_extension(uploaded_data)
+            check_dataframe_columns(uploaded_data)
             
             # Sube el archivo a la base de datos
             with st.spinner('Subiendo archivo a la base de datos'):
@@ -40,19 +52,19 @@ def main():
         tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
         with tab_1:
             # Carga el DataFrame transformado 
-            df_transformed = backend.get_transformed_dataframe(response)
+            df_transformed = get_transformed_dataframe(response)
             
             # Dataframe para mostrar en la interdaz, solo las 100 primeras filas
             df_transformed = df_transformed.head(100)
 
             # Aplica estilos al DataFrame transformado 
-            df_styled = backend.get_styled_dataframe(df_transformed)
+            df_styled = get_styled_dataframe(df_transformed)
             
             # Muestra el DataFrame con estilos en la aplicación Streamlit, ocultando el índice
             st.dataframe(df_styled, hide_index=True)
         with tab_2:
             # Permite la descarga del DataFrame en formatos CSV y Excel
-            backend.download_dataframe(df_transformed, name="base_de_datos")
+            download_dataframe(df_transformed, name="base_de_datos")
 
 if __name__ == '__main__':
     main()

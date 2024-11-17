@@ -1,4 +1,4 @@
-import style_dataframe
+from utils.style_dataframe import style_dataframe
 # Función para obtener un DataFrame con estilos a partir de un DataFrame transformado
 def get_styled_dataframe(df_transformed):
     # Aplica estilos al DataFrame transformado utilizando la función 'style_dataframe'

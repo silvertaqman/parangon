@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import transform_dataframe
+from utils.transform_dataframe import transform_dataframe
 # Función para obtener un DataFrame transformado a partir de una tabla Excel
 def get_transformed_dataframe(table):
     if table is None:

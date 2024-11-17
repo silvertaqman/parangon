@@ -1,6 +1,7 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
-from utils import get_transformed_dataframe, graficas, download_dataframe
+from utils import graficas
+from utils.do_df import get_transformed_dataframe, download_dataframe
 import data.db as db
 
 # Configurar la página de Streamlit
