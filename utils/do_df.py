@@ -4,28 +4,6 @@ import pandas as pd
 import copy
 import json
 
-# Función para obtener un DataFrame con estilos a partir de un DataFrame transformado
-def get_styled_dataframe(df_transformed):
-    # Aplica estilos al DataFrame transformado utilizando la función 'style_dataframe'
-    df_styled = style_dataframe(df_transformed)
-    
-    # Devuelve el DataFrame con estilos aplicados
-    return df_styled
-
-# Función para comprobar la extensión de un archivo cargado
-def check_extension(uploaded_data):
-    # Realiza una copia profunda de los datos cargados para no modificar los datos originales
-    copied_data = copy.deepcopy(uploaded_data)
-    
-    # Comprueba si la extensión del archivo es .xlsx (Excel)
-    if copied_data.name.endswith('xlsx'):
-        pass  # Puede hacer algo con el archivo, pero el código no muestra qué hacer
-        # st.markdown(f"##### :heavy_check_mark: _:green[{copied_data.name}]_ subido correctamente ")
-    else:
-        # Muestra un mensaje de error si el formato del archivo no es válido
-        st.error("Formato de archivo no válido. Por favor, carga un archivo Excel.")
-        st.stop()  # Detiene la ejecución de la aplicación Streamlit si se encuentra un archivo con formato incorrecto
-
 #------------------------------------------------
 # La funcion transform_dataframe puede vectorizarse para ahorrar espacio
 #------------------------------------------------
@@ -135,6 +113,13 @@ def style_dataframe(df):
     # Devuelve el DataFrame con estilos y formato aplicados
     return styled_df
 
+def get_styled_dataframe(df_transformed):
+    # Aplica estilos al DataFrame transformado utilizando la función 'style_dataframe'
+    df_styled = style_dataframe(df_transformed)
+    
+    # Devuelve el DataFrame con estilos aplicados
+    return df_styled
+
 # Función para obtener un DataFrame transformado a partir de una tabla Excel
 def get_transformed_dataframe(table):
     if table is None:
@@ -201,6 +186,20 @@ def check_dataframe_columns(uploaded_data):
 
             # Detiene la ejecución de la aplicación Streamlit si las columnas no coinciden
             st.stop()
+
+# Función para comprobar la extensión de un archivo cargado
+def check_extension(uploaded_data):
+    # Realiza una copia profunda de los datos cargados para no modificar los datos originales
+    copied_data = copy.deepcopy(uploaded_data)
+    
+    # Comprueba si la extensión del archivo es .xlsx (Excel)
+    if copied_data.name.endswith('xlsx'):
+        pass  # Puede hacer algo con el archivo, pero el código no muestra qué hacer
+        # st.markdown(f"##### :heavy_check_mark: _:green[{copied_data.name}]_ subido correctamente ")
+    else:
+        # Muestra un mensaje de error si el formato del archivo no es válido
+        st.error("Formato de archivo no válido. Por favor, carga un archivo Excel.")
+        st.stop()  # Detiene la ejecución de la aplicación Streamlit si se encuentra un archivo con formato incorrecto
 
 # Función para mostrar botones de descarga de datos en una aplicación Streamlit
 def download_dataframe(df, name="Base"):
