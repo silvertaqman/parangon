@@ -25,9 +25,6 @@ except Exception as e:
 # Obtener la configuración específica de PostgreSQL
 db_config = get_db_config(env_settings)
 
-import streamlit as st
-import pandas as pd
-
 def main():
     # Título de la página
     st.title("Base de datos :card_file_box:")
