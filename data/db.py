@@ -79,7 +79,7 @@ def update_user(username, updates):
                 conn.commit()
                 return True
     except Exception as e:
-        logging.error(f"Error en : {e}")
+        logging.error(f"Error en update_user: {e}")
     
 
 def delete_user(username):
@@ -98,4 +98,4 @@ def update_password_to_bcrypt(username: str, password: str):
                     )
                 conn.commit()
     except Exception as e:
-        logging.error(f"Error en : {e}")
+        logging.error(f"Error en update_password_to_bcrypt: {e}")

@@ -83,20 +83,18 @@ class TransformDF:
         return df
 
     def to_db(self, df, connection_details):
-        # Convierte el DataFrame a una lista de diccionarios
-        data = df.to_dict('records')
+        # Extrae las columnas y los valores del DataFrame
         columns = df.columns.tolist()
-        # Prepara los placeholders correctamente
-        values_placeholder = ', '.join([f"%({col})s" for col in columns])  # Aquí usamos %(col)s
-        # Consulta SQL para insertar datos
-        query = f"INSERT INTO stinventario ({', '.join(columns)}) VALUES ({values_placeholder})"
+        data = df.values.tolist()  # Convierte el DataFrame a una lista de tuplas
+        
+        # Crea la consulta con placeholders genéricos %s
+        query = f"INSERT INTO stinventario ({', '.join(columns)}) VALUES %s"
 
         try:
             with psycopg2.connect(**connection_details) as conn:
                 with conn.cursor() as cursor:
-                    # Ejecuta el query utilizando execute_values para una inserción eficiente
+                    # Usa execute_values para insertar los datos de manera eficiente
                     execute_values(cursor, query, data)
-                    # Realiza commit de los cambios
                     conn.commit()
                     st.success("Datos subidos a la base de datos correctamente.")
         except Exception as e:

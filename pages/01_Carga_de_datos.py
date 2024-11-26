@@ -58,12 +58,33 @@ def main():
 
     # Botón para subir a la base de datos
     if st.button("Subir a la base de datos"):
-        try:
-            transform = TransformDF()
-            transform.to_db(st.session_state["response"], db_config) 
-            st.toast("Archivo subido a la base de datos correctamente.", icon="✔️")
-        except Exception as e:
-            st.error(f"Error al subir el archivo a la base de datos: {e}")
+        transform = TransformDF()
+        df = st.session_state["response"]
+    # Mostrar advertencia sobre la acción irreversible
+        st.warning("Advertencia: Esta acción solo podrá ser revertida por un administrador.")
+        # Calcular el tamaño del DataFrame en memoria
+        file_size = df.memory_usage(index=True, deep=True).sum()
+
+        # Limitar tamaño de archivo a 100 MB (100 * 1024 * 1024 bytes)
+        if file_size > 100 * 1024 * 1024:
+            st.error("El archivo excede el tamaño máximo permitido de 100 MB.")
+        else:
+            try:
+                # Verificar si el nombre del usuario está en st.session_state
+                if "username" not in st.session_state:
+                    st.error("El nombre de usuario no está registrado en la sesión.")
+                else:
+                    # Modificar el DataFrame para agregar el nombre del usuario en la primera columna
+                    user_name = st.session_state["username"]
+                    st.session_state["response"]["username"] = user_name  # Asegúrate de que la columna "usuario" exista
+
+                    # Realizar la subida a la base de datos
+                    transform = TransformDF()
+                    transform.to_db(df, db_config) 
+                    
+                    st.toast("Archivo subido a la base de datos correctamente.", icon="✔️")
+            except Exception as e:
+                st.error(f"Error al subir el archivo a la base de datos: {e}")
 
     # Pestañas para mostrar y exportar
     tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
