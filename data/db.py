@@ -5,39 +5,7 @@ import os
 import bcrypt
 import json
 from psycopg2.extras import Json
-from config.confloader import load_config, get_db_config, get_db_connection
-
-#env_settings = load_config()
-DISK_MOUNT_PATH = '/mnt/volume'
-# Cargar configuraciones desde YAML o .env
-
-# Nota: Las funciones relacionadas con archivos (create_drive y get_drive) 
-# necesitarán una solución diferente, ya que PostgreSQL no maneja archivos directamente.
-# Podrías considerar usar un sistema de archivos separado o un servicio de almacenamiento en la nube.
-
-def create_drive(username, file):
-    file_name = f"{username}/table.xlsx"
-    file_path = os.path.join(DISK_MOUNT_PATH, file_name)
-
-    # Crea el directorio si no existe
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-    # Guarda el archivo en el disco montado
-    with open(file_path, 'wb') as f:
-        f.write(file.read())
-        
-    return file_path  # Devuelve la ruta del archivo guardado
-
-def get_drive(username):
-    file_name = f"{username}/table.xlsx"
-    file_path = os.path.join(DISK_MOUNT_PATH, file_name)
-
-    # Verifica si el archivo existe antes de intentar leerlo
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as f:
-            return f.read()  # Devuelve los datos binarios del archivo
-    else:
-        return None
+from config.confloader import get_db_connection
 
 # Las funciones para manejo de usuario se mantienen
 def insert_user(username, name, email, parameters, password, drivers):
@@ -45,9 +13,9 @@ def insert_user(username, name, email, parameters, password, drivers):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO users (username, name, email, parameters, password, drivers) "
+                "INSERT INTO users (id,username,password_hash,email,created_at,name) "
                 "VALUES (%s, %s, %s, %s, %s, %s) RETURNING username",
-                (username, name, email, parameters, hashed_password, drivers)
+                (id, username, password_hash, email, created_at, name)
             )
             conn.commit()
             return cur.fetchone()[0]
@@ -56,7 +24,7 @@ def fetch_all_users():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT username, name, email, password FROM users")
+                cur.execute("SELECT username, name, email, password_hash FROM users")
                 users = cur.fetchall()
                 return {
                     "usernames": {user[0]: {

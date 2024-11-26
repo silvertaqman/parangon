@@ -1,7 +1,7 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
 from utils import plot_df
-from utils.do_df import get_transformed_dataframe, download_dataframe
+from utils.do_df import download_dataframe
 import data.db as db
 
 # Configurar la página de Streamlit
@@ -17,15 +17,9 @@ if not st.session_state.get("data_ready", False):
 def main():
         # Título principal de la aplicación
         st.title("Data mining drivers por categoría")
-        
-        # Obtiene los datos de la base de datos según el usuario autenticado
-        database_res = db.get_drive(st.session_state["username"])
-        
-        # Transforma los datos de la base de datos utilizando funciones del módulo "backend"
-        saved_database = get_transformed_dataframe(database_res)
 
         # Calcula una tabla de valores pivotantes por categoría de producto en base a la función del backend
-        produc_table = plot_df.pivot_value_table(saved_database, 'cat_producto')
+        produc_table = plot_df.pivot_value_table(st.session_state["response"], 'cat_producto')
         # Calcula una tabla de porcentajes a partir de la tabla anterior
         percent_produc_table = plot_df.pivot_percent_table(produc_table)
 

@@ -27,8 +27,11 @@ def create_table_charge_and_save(obj, attribute_key, title, format=None):
             value = st.text_input(param, key=f"{attribute_key}_{param}")
         updated_params.append(value)
     
+    # Generar un identificador único para el botón
+    button_key = f"save_button_{attribute_key}_{id(obj)}"  # Usando el id del objeto para hacerlo único
+    
     # Guardar los parámetros en el objeto
-    if st.button(f"Guardar {title}", key=f"save_button_{attribute_key}"):
+    if st.button(f"Guardar {title}", key=button_key):
         setattr(obj, attribute_key, updated_params)
         st.success(f"{title} guardados exitosamente!")
         

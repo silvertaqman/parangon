@@ -1,9 +1,11 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
-from utils.do_df import check_dataframe_columns, check_extension, get_styled_dataframe, get_transformed_dataframe, download_dataframe
+from utils.do_df import get_styled_dataframe, download_dataframe
 import data.db as db
 from config.confloader import load_config, get_db_config
 import logging
+import pandas as pd
+from utils.structure_df import TransformDF
 
 # Configurar la página de Streamlit
 st.set_page_config(
@@ -23,52 +25,60 @@ except Exception as e:
 # Obtener la configuración específica de PostgreSQL
 db_config = get_db_config(env_settings)
 
+import streamlit as st
+import pandas as pd
+
 def main():
-        # Título de la página
-        st.title("Base de datos :card_file_box:")
+    # Título de la página
+    st.title("Base de datos :card_file_box:")
+    st.write("Sube un archivo Excel para procesarlo y cargarlo a la base de datos.")
 
-        # Permite al usuario cargar un archivo
-        uploaded_data = st.file_uploader(label="", label_visibility='collapsed')
+    # Variables iniciales en la sesión
+    if "response" not in st.session_state:
+        st.session_state["response"] = None
 
-        if uploaded_data:
-            # Verifica la extensión del archivo y las columnas del DataFrame
-            check_extension(uploaded_data)
-            check_dataframe_columns(uploaded_data)
-            
-            # Sube el archivo a la base de datos
-            with st.spinner('Subiendo archivo a la base de datos'):
-                db.create_drive(".", uploaded_data)
-            st.toast('Archivo subido correctamente!', icon='✔️')
+    # Cargar archivo
+    uploaded_data = st.file_uploader(label="", label_visibility='collapsed', type=["xlsx", "xls"])
+    
+    if uploaded_data:
+        try:
+            # Leer archivo y transformarlo
+            df = pd.read_excel(uploaded_data) if uploaded_data.name.endswith("xlsx") else pd.read_csv(uploaded_data)
+            transform = TransformDF()  # Asegúrate de tener esta clase definida correctamente
+            transform.check_df_columns(df)
+            response = transform.calculate_df(df)
+            st.session_state["response"] = response
 
-        # Obtiene la respuesta (archivo Excel) desde la base de datos
-        response = db.get_drive(".")
+            st.success("Archivo cargado y procesado correctamente.")
+        except Exception as e:
+            st.error(f"Error al leer el archivo: {e}")
+            return
 
-        # si se va a cargar un archivo por primera vez se muestra en la interfaz un mensaje
-        if response is None:
-            st.info("Por favor, carga un archivo Excel utilizando el botón de arriba.")
-            st.stop()  
-        st.session_state["data_ready"] = True
-        # Crea dos pestañas para mostrar el contenido y permitir la exportación
-        tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
-        with tab_1:
-            # Carga el DataFrame transformado 
-            df_transformed = get_transformed_dataframe(response)
-            
-            # Dataframe para mostrar en la interdaz, solo las 100 primeras filas
-            df_transformed = df_transformed.head(100)
+    # Si no hay archivo cargado, mostrar mensaje informativo
+    if st.session_state["response"] is None:
+        st.info("Por favor, carga un archivo Excel utilizando el botón de arriba.")
+        return
 
-            # Aplica estilos al DataFrame transformado 
-            df_styled = get_styled_dataframe(df_transformed)
-            
-            # Muestra el DataFrame con estilos en la aplicación Streamlit, ocultando el índice
-            st.dataframe(df_styled, hide_index=True)
-        with tab_2:
-            # Permite la descarga del DataFrame en formatos CSV y Excel
-            download_dataframe(df_transformed, name="base_de_datos")
+    # Botón para subir a la base de datos
+    if st.button("Subir a la base de datos"):
+        try:
+            transform = TransformDF()
+            transform.to_db(st.session_state["response"], db_config) 
+            st.toast("Archivo subido a la base de datos correctamente.", icon="✔️")
+        except Exception as e:
+            st.error(f"Error al subir el archivo a la base de datos: {e}")
+
+    # Pestañas para mostrar y exportar
+    tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
+    with tab_1:
+        df_styled = get_styled_dataframe(st.session_state["response"])
+        st.dataframe(df_styled, hide_index=True)
+    with tab_2:
+        # Exportar datos en CSV o Excel
+        if st.session_state["response"] is not None:
+            download_dataframe(st.session_state["response"], name="base_de_datos")
 
 if __name__ == '__main__':
     main()
 
-"""
-Esta funcion mantiene el ultimo archivo cargado, eso deberia removerse.
-"""
+
