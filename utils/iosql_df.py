@@ -10,20 +10,18 @@ class Model:
     def __init__(self, table_name):
         self.table_name = table_name
 
-    def save_to_db(self, df):
+    def save_to_db(self, df, config):
         """
         Guarda un DataFrame en la tabla correspondiente de PostgreSQL.
         """
         try:
-            with get_db_connection() as conn:
+            with get_db_connection(config) as conn:
                 # Inserta filas del DataFrame en la base de datos
                 for _, row in df.iterrows():
                     query = f"INSERT INTO {self.table_name} ({', '.join(df.columns)}) VALUES ({', '.join(['%s'] * len(row))})"
                 cursor = conn.cursor()
                 cursor.execute(query, tuple(row))
                 conn.commit()
-                cursor.close()
-                conn.close()
             return "Datos guardados exitosamente en la base de datos."
         except Exception as e:
             return f"Error al guardar en la base de datos: {str(e)}"
@@ -63,76 +61,76 @@ class Controller:
         """
         return all(data.values())  # Ejemplo: Asegurarse de que todos los campos estén llenos
 
-    def save_data(self, data):
+    def save_data(self, data, config):
         """
         Guarda los datos en la base de datos.
         """
         try:
             df = pd.DataFrame([data])  # Crear DataFrame a partir de los datos
-            return self.model.save_to_db(df)  # Guardar usando el modelo
+            return self.model.save_to_db(df, config)  # Guardar usando el modelo
         except Exception as e:
             return f"Error al guardar los datos: {str(e)}"
 
 
-# Clase para guardar nombres de parametros (reemplaza json database y params)
 class Almacenaje:
     def __init__(self):
-        self.datos = [
-            "Número de personas almacén",
-            "Metros cuadrados del almacén",
-            "Número de equipos",
-            "Número de posiciones",
-            "Otros gastos de almacén"
-        ]
-        self.costos_gastos = [
-            "Costo mano de obra anual $",
-            "Costo del alquiler del almacén $",
-            "Costo suministros de oficina $",
-            "Costos de energía (electricidad, gas, otros) $",
-            "Servicios de terceros en logística (3PL) $",
-            "Otros gastos $"
-        ]
-        self.inversiones = [
-            "Inversiones en edificio y terreno $",
-            "Sistema de manejo de materiales (montacargas, elevadores, carretillas, baterías, etc) $",
-            "Sistemas de almacenamiento (Racks, Conveyors, carretillas, etc) $",
-            "WMS (licencias, mantenimiento, etc) $",
-            "Seguros del inventario $",
-            "Otras inversiones $"
-        ]
+        # Mapeo para datos
+        self.datos = {
+            "numero_personas_almacen": "Número de personas almacén",
+            "metros_cuadrados_almacen": "Metros cuadrados del almacén",
+            "numero_equipos": "Número de equipos",
+            "numero_posiciones": "Número de posiciones",
+            "otros_gastos_almacen": "Otros gastos de almacén"
+        }
+        
+        # Mapeo para costos y gastos
+        self.costos_gastos = {
+            "costo_mano_obra_anual": "Costo mano de obra anual $",
+            "costo_alquiler_almacen": "Costo del alquiler del almacén $",
+            "costo_suministros_oficina": "Costo suministros de oficina $",
+            "costos_energia": "Costos de energía (electricidad, gas, otros) $",
+            "servicios_terceros_logistica": "Servicios de terceros en logística (3PL) $",
+            "otros_gastos": "Otros gastos $"
+        }
+        
+        # Mapeo para inversiones
+        self.inversiones = {
+            "inversiones_edificio_terreno": "Inversiones en edificio y terreno $",
+            "sistema_manejo_materiales": "Sistema de manejo de materiales (montacargas, elevadores, carretillas, baterías, etc) $",
+            "sistemas_almacenamiento": "Sistemas de almacenamiento (Racks, Conveyors, carretillas, etc) $",
+            "wms": "WMS (licencias, mantenimiento, etc) $",
+            "seguros_inventario": "Seguros del inventario $",
+            "otras_inversiones": "Otras inversiones $"
+        }
 
-    def calcular_total_costos(self, costos):
-        """Ejemplo de cálculo basado en costos."""
-        return sum(costos)
 
 class Inventario:
     def __init__(self):
-        self.datos = [
-            "Número de personas dedicadas al control de inventario (encargados y planeadores)",
-            "Metros cuadrados de oficinas inventarios",
-            "Número de equipos (fax, computadoras, etc)"
-        ]
-        self.costos_gastos = [
-            "Costos de mano de obra de personas dedicadas al control de inventario $",
-            "Costos de energía de la oficina de inventarios $",
-            "Suministros de oficina de inventarios $",
-            "Costos de espacio de oficina de inventarios $",
-            "Otros gastos de la oficina de inventarios $"
-        ]
-        # Más atributos...
+        # Mapeo para datos
+        self.datos = {
+            "numero_personas_inventario": "Número de personas dedicadas al control de inventario (encargados y planeadores)",
+            "metros_cuadrados_oficinas": "Metros cuadrados de oficinas inventarios",
+            "numero_equipos_inventario": "Número de equipos (fax, computadoras, etc)"
+        }
+        
+        # Mapeo para costos y gastos
+        self.costos_gastos = {
+            "costos_mano_obra": "Costos de mano de obra de personas dedicadas al control de inventario $",
+            "costos_energia_oficina": "Costos de energía de la oficina de inventarios $",
+            "suministros_oficina": "Suministros de oficina de inventarios $",
+            "costos_espacio_oficina": "Costos de espacio de oficina de inventarios $",
+            "otros_gastos_oficina": "Otros gastos de la oficina de inventarios $"
+        }
 
-    def calcular_inversion_total(self, inversiones):
-        """Ejemplo de cálculo basado en inversiones."""
-        return sum(inversiones)
 
 class Generales:
     def __init__(self):
-        self.financieros = ["Costo de capital de la empresa %"]
-        self.operativos = ["Número de horas laborales anual FTE"]
-        # Más atributos...
-
-    def obtener_financieros(self):
-        """Ejemplo de funcionalidad específica."""
-        return self.financieros
-
-# Clase para almacenar valores ingresados en parametros
+        # Mapeo para financieros
+        self.financieros = {
+            "costo_capital_empresa": "Costo de capital de la empresa %"
+        }
+        
+        # Mapeo para operativos
+        self.operativos = {
+            "numero_horas_laborales_anual": "Número de horas laborales anual FTE"
+        }

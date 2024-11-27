@@ -41,5 +41,5 @@ def get_db_config(env_settings: Dict[str, str]) -> Dict[str, str]:
     }
 
 
-def get_db_connection(db_config):
-    return psycopg2.connect(**db_config)
+def get_db_connection(db_configuration):
+    return psycopg2.connect(**db_configuration)
