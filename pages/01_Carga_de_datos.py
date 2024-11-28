@@ -14,16 +14,18 @@ st.set_page_config(
     layout="wide"  # Diseño de la página
 )
 
+if "username" not in st.session_state or st.session_state["username"] is None:
+    st.warning("No has iniciado sesión. Por favor, regresa a la página de inicio de sesión.")
+    st.stop()
+
 # Cargar toda la configuración
 try:
     env_settings = load_config()
-    #print(f"Configuración cargada: {env_settings}")
+    # Obtener la configuración específica de PostgreSQL
+    db_config = get_db_config(env_settings)
 except Exception as e:
     logging.error(f"Error al cargar la configuración: {e}")
     raise
-
-# Obtener la configuración específica de PostgreSQL
-db_config = get_db_config(env_settings)
 
 def main():
     # Título de la página

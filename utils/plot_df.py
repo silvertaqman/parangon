@@ -10,7 +10,7 @@ def pivot_value_table(df, index:str):
     
     # Define un diccionario que mapea columnas y operaciones de agregación
     map_for_pivot = {'cod_producto': 'count',
-                     'inv_prom/bultos': 'sum',
+                     'inv_prom_bultos': 'sum',
                      'bultos_vendidos': 'sum',
                      'valor_inv_prom_bultos': 'sum',
                      'ventas_totales': 'sum',
@@ -50,7 +50,7 @@ def show_pivot_value_table(pivot_table):
     integer_format = "{:.0f}"
     styled_pivot_table = styled_pivot_table.format({
         'count(cod_producto)': integer_format,
-        'sum(inv_prom/bultos)': integer_format,
+        'sum(inv_prom_bultos)': integer_format,
         'sum(bultos_vendidos)': integer_format,
         'sum(valor_inv_prom_bultos)': currency_format,
         'sum(ventas_totales)': currency_format,

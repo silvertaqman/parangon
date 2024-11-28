@@ -1,5 +1,4 @@
 import streamlit as st
-import data.db as db
 from config.confloader import load_config, get_db_config
 from utils.iosql_df import Almacenaje, Inventario, Generales, Model, View, Controller
 import logging
@@ -77,30 +76,38 @@ def main():
 
         st.subheader("Operativos Generales")
         collected_data["generales"]["operativos"] = recolectar_datos(generales.operativos, "generales_operativos")
-
+        
     # Botón para guardar todos los datos
     if st.button("Enviar Todo"):
-        username = st.session_state["username"]
         success = True
+
+        # Unir todos los datos recolectados en una sola estructura para la fila única
+        combined_data = {}
         for category, sections in collected_data.items():
-            for section_name, section_data in sections.items():
-                # Agregar username a cada registro
-                section_data["username"] = username
-                
-                # Simular validación y guardado de datos
-                model = Model(table_name=category)  # Cambiar el nombre de la tabla según la categoría
-                controller = Controller(model, View())
-                if controller.validate_data(section_data):
-                    message = controller.save_data(section_data, db_config)
-                    st.success(f"{section_name.capitalize()} de {category} guardados correctamente.")
+            record = {}
+            for section_data in sections.values():
+                record |= section_data
+            combined_data[category] = record
+            combined_data[category]["username"] = st.session_state["username"]
+            try:
+                final_model = Model(table_name=category)  # Cambiar por el nombre real de la tabla
+                final_controller = Controller(final_model, View())
+
+                # Validar y guardar los datos combinados
+                if final_controller.validate_data(combined_data[category]):
+                    message = final_controller.save_data(combined_data[category], db_config)
+                    st.success(message)
                 else:
-                    st.error(f"Error al validar {section_name.capitalize()} de {category}.")
+                    st.error("Error al validar los datos.")
                     success = False
+            except Exception as e:
+                st.error(f"Error al procesar los datos: {e}")
+                success = False
 
         if success:
-            st.success("¡Todos los datos se han guardado correctamente!")
+            st.success("¡Proceso completado exitosamente!")
         else:
-            st.error("Hubo errores en el guardado. Revisa las secciones marcadas.")
+            st.error("Hubo errores al guardar los datos combinados. Revisa el log.")
 
 if __name__ == '__main__':
     main()

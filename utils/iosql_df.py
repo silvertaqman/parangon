@@ -18,10 +18,11 @@ class Model:
             with get_db_connection(config) as conn:
                 # Inserta filas del DataFrame en la base de datos
                 for _, row in df.iterrows():
-                    query = f"INSERT INTO {self.table_name} ({', '.join(df.columns)}) VALUES ({', '.join(['%s'] * len(row))})"
-                cursor = conn.cursor()
-                cursor.execute(query, tuple(row))
-                conn.commit()
+                    query = f"INSERT INTO {self.table_name} ({', '.join(df.columns)}) VALUES ({', '.join(['%s'] * len(df.columns))})"
+                    st.write(query)
+                    cursor = conn.cursor()
+                    cursor.execute(query, tuple(row.tolist()))
+                    conn.commit()
             return "Datos guardados exitosamente en la base de datos."
         except Exception as e:
             return f"Error al guardar en la base de datos: {str(e)}"

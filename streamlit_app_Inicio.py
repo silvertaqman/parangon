@@ -39,7 +39,7 @@ def main():
             else:
                 st.session_state["authentication_status"] = False
                 st.error("Usuario o contraseña incorrectos")
-    elif st.session_state["authentication_status"]:
+    if st.session_state["authentication_status"]:
         # Mostrar contenido principal para usuarios autenticados
         st.write(f"Bienvenido, {st.session_state['username']}!")
         if st.button("Cerrar sesión"):

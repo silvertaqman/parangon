@@ -10,9 +10,11 @@ st.set_page_config(
     page_icon="🏗️",  # Ícono de la página
     layout="wide"  # Diseño de la página
 )
-if not st.session_state.get("data_ready", False):
-    st.error("Los datos no están disponibles. Completa el proceso de ingreso de datos para acceder a esta página.")
+
+if "username" not in st.session_state or st.session_state["username"] is None:
+    st.warning("No has iniciado sesión. Por favor, regresa a la página de inicio de sesión.")
     st.stop()
+
 
 def main():
         # Título principal de la aplicación
