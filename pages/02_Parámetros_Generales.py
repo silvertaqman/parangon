@@ -13,7 +13,6 @@ st.set_page_config(
 try:
     env_settings = load_config()
     db_config = get_db_config(env_settings)
-    #print(f"Configuración cargada: {env_settings}")
 except Exception as e:
     logging.error(f"Error al cargar la configuración: {e}")
     raise
@@ -27,7 +26,6 @@ def main():
     if "username" not in st.session_state:
         st.error("Inicia sesión para continuar")
 
-    # Verificar que el usuario esté configurado
     if not st.session_state["username"]:
         st.warning("Por favor, inicia sesión antes de continuar.")
         return
@@ -47,6 +45,25 @@ def main():
             data[key] = st.text_input(f"{label}:", key=f"{section_key}_{key}")  # Inputs únicos
         return data
 
+    # Función para manejar el envío de datos de una categoría
+    def enviar_datos(categoria, datos_categoria):
+        try:
+            record = {}
+            for section_data in datos_categoria.values():
+                record |= section_data
+            record["username"] = st.session_state["username"]
+
+            final_model = Model(table_name=categoria)
+            final_controller = Controller(final_model, View())
+
+            if final_controller.validate_data(record):
+                message = final_controller.save_data(record, db_config)
+                st.success(f"Categoría '{categoria}' guardada: {message}")
+            else:
+                st.error(f"Error al validar los datos para '{categoria}'.")
+        except Exception as e:
+            st.error(f"Error procesando '{categoria}': {e}")
+
     # Crear pestañas para diferentes categorías
     tab1, tab2, tab3 = st.tabs(["Almacenaje", "Inventario", "Generales"])
 
@@ -61,6 +78,9 @@ def main():
         st.subheader("Inversiones de Almacenaje")
         collected_data["almacenaje"]["inversiones"] = recolectar_datos(almacenaje.inversiones, "almacenaje_inversiones")
 
+        if st.button("Enviar Almacenaje"):
+            enviar_datos("almacenaje", collected_data["almacenaje"])
+
     # Pestaña "Parámetros Inventario"
     with tab2:
         st.subheader("Datos de Inventario")
@@ -69,6 +89,9 @@ def main():
         st.subheader("Costos y Gastos de Inventario")
         collected_data["inventario"]["costos_gastos"] = recolectar_datos(inventario.costos_gastos, "inventario_costos")
 
+        if st.button("Enviar Inventario"):
+            enviar_datos("inventario", collected_data["inventario"])
+
     # Pestaña "Parámetros Generales"
     with tab3:
         st.subheader("Financieros Generales")
@@ -76,38 +99,9 @@ def main():
 
         st.subheader("Operativos Generales")
         collected_data["generales"]["operativos"] = recolectar_datos(generales.operativos, "generales_operativos")
-        
-    # Botón para guardar todos los datos
-    if st.button("Enviar Todo"):
-        success = True
 
-        # Unir todos los datos recolectados en una sola estructura para la fila única
-        combined_data = {}
-        for category, sections in collected_data.items():
-            record = {}
-            for section_data in sections.values():
-                record |= section_data
-            combined_data[category] = record
-            combined_data[category]["username"] = st.session_state["username"]
-            try:
-                final_model = Model(table_name=category)  # Cambiar por el nombre real de la tabla
-                final_controller = Controller(final_model, View())
-
-                # Validar y guardar los datos combinados
-                if final_controller.validate_data(combined_data[category]):
-                    message = final_controller.save_data(combined_data[category], db_config)
-                    st.success(message)
-                else:
-                    st.error("Error al validar los datos.")
-                    success = False
-            except Exception as e:
-                st.error(f"Error al procesar los datos: {e}")
-                success = False
-
-        if success:
-            st.success("¡Proceso completado exitosamente!")
-        else:
-            st.error("Hubo errores al guardar los datos combinados. Revisa el log.")
+        if st.button("Enviar Generales"):
+            enviar_datos("generales", collected_data["generales"])
 
 if __name__ == '__main__':
     main()

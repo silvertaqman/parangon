@@ -19,13 +19,20 @@ class Model:
                 # Inserta filas del DataFrame en la base de datos
                 for _, row in df.iterrows():
                     query = f"INSERT INTO {self.table_name} ({', '.join(df.columns)}) VALUES ({', '.join(['%s'] * len(df.columns))})"
-                    st.write(query)
+                    # st.write(query) desactiva para ver la forma de la query
                     cursor = conn.cursor()
                     cursor.execute(query, tuple(row.tolist()))
                     conn.commit()
             return "Datos guardados exitosamente en la base de datos."
         except Exception as e:
             return f"Error al guardar en la base de datos: {str(e)}"
+    
+    # Función para recolectar datos de una pestaña
+    def recolectar_datos(columns, section_key):
+        data = {}
+        for key, label in columns.items():
+            data[key] = st.text_input(f"{label}:", key=f"{section_key}_{key}")  # Inputs únicos
+        return data
 
 class View:
     """
@@ -109,18 +116,24 @@ class Inventario:
     def __init__(self):
         # Mapeo para datos
         self.datos = {
-            "numero_personas_inventario": "Número de personas dedicadas al control de inventario (encargados y planeadores)",
-            "metros_cuadrados_oficinas": "Metros cuadrados de oficinas inventarios",
-            "numero_equipos_inventario": "Número de equipos (fax, computadoras, etc)"
+            "numero_personas_control_inventario": "Número de personas dedicadas al control de inventario (encargados y planeadores)",
+            "metros_cuadrados_oficinas_inventarios": "Metros cuadrados de oficinas inventarios",
+            "numero_equipos_oficina_inventarios": "Número de equipos (fax, computadoras, etc)"
         }
         
         # Mapeo para costos y gastos
         self.costos_gastos = {
-            "costos_mano_obra": "Costos de mano de obra de personas dedicadas al control de inventario $",
-            "costos_energia_oficina": "Costos de energía de la oficina de inventarios $",
-            "suministros_oficina": "Suministros de oficina de inventarios $",
-            "costos_espacio_oficina": "Costos de espacio de oficina de inventarios $",
-            "otros_gastos_oficina": "Otros gastos de la oficina de inventarios $"
+            "numero_skus": "Stock Keeping Unit",
+            "numero_proveedores": "Número de proveedores",
+            "costos_mano_obra_control_inventario": "Costos de mano de obra de personas dedicadas al control de inventario $",
+            "costos_energia_oficina_inventarios": "Costos de energía de la oficina de inventarios $",
+            "suministros_oficina_inventarios": "Suministros de oficina de inventarios $",
+            "costos_espacio_oficina_inventarios": "Costos de espacio de oficina de inventarios $",
+            "otros_gastos_oficina_inventarios": "Otros gastos de la oficina de inventarios $",
+            "inversion_hardware": "Costo del Hardware $",
+            "inversion_software_inventarios": "Costo del Software $",
+            "inversion_promedio_inventario": "Costo promedio del inventario $",
+            "costo_financiero_inversion_inventario": "Costo financiero de la inversión"
         }
 
 
@@ -128,10 +141,12 @@ class Generales:
     def __init__(self):
         # Mapeo para financieros
         self.financieros = {
-            "costo_capital_empresa": "Costo de capital de la empresa %"
+            "costo_capital_empresa": "Costo de capital de la empresa %",
+            "ventas": "Precio de venta $",
+            "ventas_al_costo": "Precio de venta al costo $"
         }
         
         # Mapeo para operativos
         self.operativos = {
-            "numero_horas_laborales_anual": "Número de horas laborales anual FTE"
+            "numero_horas_laborales_anuales_fte": "Número de horas laborales anual FTE"
         }
