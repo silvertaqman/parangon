@@ -1,7 +1,7 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
-from utils import backend
-import db
+from utils.plot_df import *
+from utils.do_df import download_dataframe
 
 # Configurar la página de Streamlit
 st.set_page_config(
@@ -10,9 +10,10 @@ st.set_page_config(
     layout="wide"  # Diseño de la página
 )
 
-if not st.session_state.get("data_ready", False):
-    st.error("Los datos no están disponibles. Completa el proceso de ingreso de datos para acceder a esta página.")
-    st.stop()
+#if not st.session_state.get("response", False):
+#    st.error("Los datos no están disponibles. Completa el proceso de ingreso de datos para acceder a esta página.")
+#    st.stop()
+
 def main():
     # Comprueba el estado de autenticación del usuario
     if st.session_state["authentication_status"] is False:
@@ -27,17 +28,14 @@ def main():
         # Título principal de la aplicación 
         st.title("Data mining drivers por subcategoría")
     
-        # Obtiene los datos de la base de datos según el usuario autenticado
-        database_res = db.get_drive(st.session_state["username"])
-    
         # Transforma los datos de la base de datos utilizando funciones del módulo "backend"
-        saved_database = db.get_transformed_dataframe(database_res)
+        saved_database = st.session_state["response"]
 
         # Calcula una tabla de valores pivotantes por categoría de producto en base a la función del backend
-        produc_table = backend.pivot_value_table(saved_database, "subcat_producto")
+        produc_table = pivot_value_table(saved_database, "subcat_producto")
 
         # Calcula una tabla de porcentajes a partir de la tabla anterior
-        percent_produc_table = backend.pivot_percent_table(produc_table)
+        percent_produc_table = pivot_percent_table(produc_table)
 
         # Expansor para mostrar cálculo de drivers por categoría
         with st.expander("Cálculo de drivers por categoría"):
@@ -45,10 +43,10 @@ def main():
             tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
             with tab_1:
                 # Muestra la tabla de valores pivotantes
-                backend.show_pivot_value_table(produc_table)
+                show_pivot_value_table(produc_table)
             with tab_2:
                 # Permite la descarga de la tabla en formato de archivo
-                backend.download_dataframe(produc_table, name="drivers_por_categoria")
+                download_dataframe(produc_table, name="drivers_por_categoria")
 
         # Expansor para mostrar el porcentaje de drivers por categoría
         with st.expander("Porcentaje de drivers por categoría"):
@@ -56,13 +54,13 @@ def main():
             tab_1, tab_2 = st.tabs(["Tabla 📄", "Exportar 📁"])
             with tab_1:
                 # Muestra la tabla de porcentajes
-                backend.show_pivot_percent_table(percent_produc_table)
+                show_pivot_percent_table(percent_produc_table)
             with tab_2:
                 # Permite la descarga de la tabla de porcentajes en formato de archivo
-                backend.download_dataframe(percent_produc_table, name="drivers_por_categoria_porcentaje") 
+                download_dataframe(percent_produc_table, name="drivers_por_categoria_porcentaje") 
 
         # Muestra un gráfico de barras basado en la tabla de porcentajes
-        backend.show_barchart_dataminnigdrivers(percent_produc_table)
+        show_barchart_dataminnigdrivers(percent_produc_table)
         
 if __name__ == '__main__':
     main()

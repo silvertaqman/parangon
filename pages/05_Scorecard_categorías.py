@@ -1,8 +1,10 @@
 # Importar las bibliotecas necesarias
 import streamlit as st
-from utils import backend
-import database
+from utils.plot_df import *
+from data import db
 import json
+from utils.iosql_df import Almacenaje, Generales, Inventario
+from utils.do_df import download_dataframe
 
 # Configurar la página de Streamlit
 st.set_page_config(
@@ -11,9 +13,9 @@ st.set_page_config(
     layout="wide"  # Diseño de la página
 )
 
-if not st.session_state.get("data_ready", False):
-    st.error("Los datos no están disponibles. Completa el proceso de ingreso de datos para acceder a esta página.")
-    st.stop()
+#if not st.session_state.get("data_ready", False):
+#    st.error("Los datos no están disponibles. Completa el proceso de ingreso de datos para acceder a esta página.")
+#    st.stop()
 def main():
     # Comprueba el estado de autenticación del usuario
     if st.session_state["authentication_status"] is False:
@@ -26,21 +28,26 @@ def main():
         # Si la autenticación es exitosa, muestra el contenido principal
 
         # Obtener la información del usuario desde la base de datos.
-        drive_res = database.get_drive(st.session_state["username"])
-        res = database.fetch_user(st.session_state["username"])
+        drive_res = st.session_state["response"]
+        res = db.fetch_user(st.session_state["username"])
 
         # Obtener los parámetros y drivers del usuario desde la base de datos.
         parameters = res["parameters"]
         drivers = res["drivers"]
 
         # Transformar los datos y crear tablas de valor y porcentaje.
-        df_transformed = backend.get_transformed_dataframe(drive_res)
-        value_produc_table = backend.pivot_value_table(df_transformed, 'cat_producto')
-        percent_produc_table = backend.pivot_percent_table(value_produc_table)
+        df_transformed = st.session_state["response"]
+        value_produc_table = pivot_value_table(df_transformed, 'cat_producto')
+        percent_produc_table = pivot_percent_table(value_produc_table)
 
         # Cargar los nombres de los parámetros desde un archivo JSON.
-        with open('json_files/param_names.json', 'r') as archivo_json:
-            param_names = json.load(archivo_json)
+        almacenaje = Almacenaje()
+        generales = Generales()
+        inventario = Inventario()
+        param_names = almacenaje.datos
+        """
+        Continuar debugging desde aqui
+        """
         
         # Definir una función para calcular y mostrar el scorecard.
         def scorecard(percent_produc_table, table_name, inver_param_names, cost_param_names,
@@ -65,7 +72,7 @@ def main():
             # Definir una función para guardar los cambios realizados en el scorecard.
             def save():
                 drivers["categorias"][drivers_key] = scorecard["Drivers"].to_list()[:-1]
-                database.update_user(username=st.session_state["username"], updates={"drivers": drivers})
+                db.update_user(username=st.session_state["username"], updates={"drivers": drivers})
 
             st.button("Calcular", on_click=save, key=drivers_key)
 
@@ -88,7 +95,7 @@ def main():
                 capital_cost_value = float(parameters["gen_financieros"][0]["value"]))
         
             with tab_2:
-                backend.download_dataframe(alm_scorecard, name="scorecard_cost_almacen_cat")
+                download_dataframe(alm_scorecard, name="scorecard_cost_almacen_cat")
 
         # Sección para mostrar el scorecard de "Costos del inventario".
         with st.expander("Costos del inventario"):
